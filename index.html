@@ -3,648 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maryoul E-Commerce & Automation Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Maryoul | لوحة الأتمتة الشاملة</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                        },
-                        darkbg: '#0b0f19',
-                        cardbg: '#111827',
-                        cardborder: '#1f2937'
-                    },
-                    fontFamily: {
-                        sans: ['Tajawal', 'Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; transition: background-color 0.3s, color 0.3s; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .glass-panel { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .pulse-live { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-light: #94a3b8;
+            --border: #334155;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border); }
+        h1 { font-size: 1.1rem; font-weight: bold; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 8px; transition: 0.2s; }
+        .btn:hover { background: var(--primary-hover); }
+        textarea, input { width: 100%; background: #0f172a; border: 1px solid var(--border); color: var(--text); padding: 10px; border-radius: 8px; margin-top: 8px; font-size: 0.9rem; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 10px 20px; border-radius: 8px; display: none; z-index: 1000; font-size: 0.9rem; }
     </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col justify-between">
+<body>
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-cardbg/90 backdrop-blur-md border-b border-gray-800 px-4 py-3">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3 space-x-reverse">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid font-bold text-xl text-white fa-robot"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight text-white flex items-center gap-2">
-                        <span>متجر Maryoul | لوحة الأتمتة الشاملة</span>
-                        <span class="px-2 py-0.5 text-xs rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Auto-Pilot Active</span>
-                    </h1>
-                    <p class="text-xs text-gray-400">إدارة 13+ منصة وتسويق تلقائي دون تدخل بشري</p>
-                </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <button id="langToggle" onclick="toggleLanguage()" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-semibold flex items-center gap-1 border border-gray-700">
-                    <i class="fa-solid fa-globe"></i> <span id="langText">English</span>
-                </button>
-                <button id="themeToggle" onclick="toggleTheme()" class="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700">
-                    <i class="fa-solid fa-sun" id="themeIcon"></i>
-                </button>
-                <button onclick="openModal('exportModal')" class="p-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1 shadow-md">
-                    <i class="fa-solid fa-download"></i> <span class="hidden sm:inline">تصدير الإعدادات</span>
-                </button>
-            </div>
-        </div>
+    <header>
+        <h1>🛒 Maryoul Ops Hub</h1>
+        <span style="font-size: 0.8rem; color: var(--success);">● متصل بـ Make Webhook</span>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl w-full mx-auto px-4 py-6 flex-1 space-y-6">
-
-        <!-- Master Automation Switch & Metrics -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="glass-panel p-5 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-gray-900 to-blue-950/40 relative overflow-hidden col-span-1 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="space-y-1 text-center sm:text-right">
-                    <div class="flex items-center justify-center sm:justify-start gap-2">
-                        <span class="w-3 h-3 rounded-full bg-emerald-500 pulse-live"></span>
-                        <h2 class="text-lg font-bold text-white">محرك التشغيل التلقائي (Auto-Pilot Execution Engine)</h2>
-                    </div>
-                    <p class="text-sm text-gray-300">جلب المنتجات من AliExpress، توليد النص والتصاميم بـ AI، والنشر تلقائياً على المنصات.</p>
-                </div>
-                <div class="flex items-center gap-3 bg-gray-900/80 p-3 rounded-xl border border-gray-800">
-                    <span class="text-xs text-gray-400 font-medium">الوضع التلقائي:</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="masterAutoSwitch" class="sr-only peer" checked onchange="toggleAutoPilot(this)">
-                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </label>
-                </div>
-            </div>
-
-            <div class="glass-panel p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                <div class="flex justify-between items-center text-xs text-gray-400">
-                    <span>إجمالي العمليات الناجحة اليوم</span>
-                    <i class="fa-solid fa-bolt text-amber-400"></i>
-                </div>
-                <div class="text-3xl font-black text-white my-1" id="execCount">1,842</div>
-                <div class="text-xs text-emerald-400 flex items-center gap-1">
-                    <i class="fa-solid fa-arrow-up"></i> +99.2% نجاح الربط مع n8n & Cloudflare
-                </div>
-            </div>
-        </section>
-
-        <!-- Tabs -->
-        <div class="flex items-center space-x-2 space-x-reverse overflow-x-auto pb-2 border-b border-gray-800 custom-scrollbar">
-            <button onclick="switchTab('platforms')" id="tab-platforms" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white whitespace-nowrap transition">
-                <i class="fa-solid fa-network-wired ml-1"></i> إدارة وتوصيل المنصات (13+)
-            </button>
-            <button onclick="switchTab('automation')" id="tab-automation" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold bg-gray-800 text-gray-400 hover:text-white whitespace-nowrap transition">
-                <i class="fa-solid fa-diagram-project ml-1"></i> مسارات الأتمتة و Webhooks
-            </button>
-            <button onclick="switchTab('ai')" id="tab-ai" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold bg-gray-800 text-gray-400 hover:text-white whitespace-nowrap transition">
-                <i class="fa-solid fa-wand-magic-sparkles ml-1"></i> مولد المحتوى بـ Gemini API
-            </button>
-            <button onclick="switchTab('analytics')" id="tab-analytics" class="tab-btn px-4 py-2 rounded-xl text-sm font-bold bg-gray-800 text-gray-400 hover:text-white whitespace-nowrap transition">
-                <i class="fa-solid fa-chart-line ml-1"></i> التحليلات والحاسبة المالية (ROI)
-            </button>
-        </div>
-
-        <!-- TAB 1: PLATFORMS INTEGRATION (13 Platforms) -->
-        <section id="content-platforms" class="tab-content space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-gray-200">الربط المباشر بـ (Adresse e-mail / Téléphone & Mot de passe) أو الـ API</h3>
-                <span class="text-xs text-gray-400">البيانات تشفر محلياً وآمنة 100%</span>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="platformsGrid">
-                <!-- Javascript will populate 13 platforms -->
-            </div>
-        </section>
-
-        <!-- TAB 2: AUTOMATION & WEBHOOK LOGS -->
-        <section id="content-automation" class="tab-content hidden space-y-6">
-            <div class="glass-panel p-5 rounded-2xl border border-gray-800">
-                <h3 class="font-bold text-white mb-3 text-sm flex items-center gap-2">
-                    <i class="fa-solid fa-plus-circle text-blue-500"></i> إنشاء مسار أتمتة تلقائي جديد (Workflow Builder)
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <select id="wfTrigger" class="bg-gray-900 border border-gray-700 text-xs rounded-xl p-2.5 text-white">
-                        <option>المحفز: سحب منتج مائل للانتشار من AliExpress</option>
-                        <option>المحفز: جدولة زمنية (كل 1 ساعة)</option>
-                        <option>المحفز: استلام Webhook طلب شراء جديد</option>
-                    </select>
-                    <select id="wfAction" class="bg-gray-900 border border-gray-700 text-xs rounded-xl p-2.5 text-white">
-                        <option>الإجراء: صياغة إعلان Gemini + تصميم Canva + نشر على IG & TikTok & YouTube</option>
-                        <option>الإجراء: تقصير الرابط وتلخيصه ومشاركته بـ Telegram Channel</option>
-                        <option>الإجراء: إرسال بيانات العمولات إلى Cloudflare Workers & RedotPay</option>
-                    </select>
-                    <button onclick="addWorkflow()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl p-2.5 transition">
-                        تفعيل المسار الآلي
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-panel p-5 rounded-2xl border border-gray-800">
-                    <h3 class="font-bold text-white mb-3 text-sm">المسارات النشطة حالياً</h3>
-                    <div class="space-y-3" id="workflowList"></div>
-                </div>
-
-                <div class="glass-panel p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-live"></span>
-                                سجل الأحداث التلقائية المباشرة (Live Stream Webhook Logs)
-                            </h3>
-                            <button onclick="clearLogs()" class="text-xs text-gray-400 hover:text-white">مسح السجل</button>
-                        </div>
-                        <div id="liveLogs" class="bg-gray-950 font-mono text-[11px] p-3 rounded-xl h-64 overflow-y-auto space-y-2 border border-gray-800 text-gray-300 custom-scrollbar"></div>
-                    </div>
-                    <div class="mt-3 flex gap-2">
-                        <input type="text" id="testWebhookUrl" placeholder="أدخل رابط n8n / Make Webhook للاختبار..." class="flex-1 bg-gray-900 border border-gray-700 text-xs rounded-xl p-2 text-white">
-                        <button onclick="testWebhook()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 rounded-xl">إرسال تجريبي</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 3: AI GENERATOR (GEMINI API) -->
-        <section id="content-ai" class="tab-content hidden space-y-6">
-            <div class="glass-panel p-6 rounded-2xl border border-gray-800">
-                <h3 class="font-bold text-white mb-4 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-sparkles text-amber-400"></i> توليد الوصف التسويقي والوسائط تلقائياً بـ الذكاء الاصطناعي
-                </h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs text-gray-400 mb-1">اسم المنتج أو رابط AliExpress</label>
-                            <input type="text" id="aiProductName" placeholder="مثال: ساعة ذكية مقاومة للماء مع تتبع الرياضة" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">منصة النشر Target</label>
-                                <select id="aiPlatform" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                                    <option>Instagram Reels & Posts</option>
-                                    <option>TikTok Ads / Video Script</option>
-                                    <option>YouTube Shorts Description</option>
-                                    <option>Telegram Channel</option>
-                                    <option>Canva Promo Banner Text</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">نبرة المحتوى</label>
-                                <select id="aiTone" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                                    <option>حماسي ومحفز للشراء</option>
-                                    <option>احترافي ومباشر</option>
-                                    <option>فكاهي وتفاعلي</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button onclick="generateAICopy()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> توليد المحتوى فوراً بـ Gemini AI
-                        </button>
-                    </div>
-
-                    <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-gray-400">النتيجة المولدة:</span>
-                                <button onclick="copyAiOutput()" class="text-xs text-blue-400 hover:underline"><i class="fa-regular fa-copy"></i> نسخ النص</button>
-                            </div>
-                            <textarea id="aiResultText" class="w-full h-44 bg-transparent text-xs text-gray-200 resize-none outline-none custom-scrollbar" readonly>اضغط على زر التوليد أعلاه للحصول على وصف إعلاني جاهز ومقترح هاشتاغات للنشر الآلي...</textarea>
-                        </div>
-                        <div class="pt-2 border-t border-gray-800 flex justify-between items-center">
-                            <span class="text-[10px] text-gray-500">جاهز للإرسال التلقائي عبر n8n</span>
-                            <button onclick="triggerAutoPost()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg">نشر تلقائي الآن</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: ANALYTICS & ROI CALCULATOR -->
-        <section id="content-analytics" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-panel p-5 rounded-2xl border border-gray-800 lg:col-span-2">
-                    <h3 class="font-bold text-white text-sm mb-4">نمو العمولات والمبيعات التلقائية لمتاجر Maryoul</h3>
-                    <div class="h-64">
-                        <canvas id="salesChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-5 rounded-2xl border border-gray-800 flex flex-col justify-between">
-                    <div>
-                        <h3 class="font-bold text-white text-sm mb-3">حاسبة الأرباح وعائد الاستثمار (ROI)</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">إجمالي ميزانية الإعلانات ($)</label>
-                                <input type="number" id="roiAdSpend" value="150" oninput="calculateROI()" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-2 text-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1">إجمالي العمولات المحققة ($)</label>
-                                <input type="number" id="roiRevenue" value="680" oninput="calculateROI()" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-2 text-white">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-2 mt-4">
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-400">صافي الربح:</span>
-                            <span class="font-bold text-emerald-400" id="netProfitVal">$530.00</span>
-                        </div>
-                        <div class="flex justify-between text-xs">
-                            <span class="text-gray-400">عائد الاستثمار (ROI):</span>
-                            <span class="font-bold text-blue-400" id="roiPercentVal">353.33%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Modal for Platform Connection (Email/Pass or API Key) -->
-    <div id="apiModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-gray-800 w-full max-w-md rounded-2xl p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <h3 class="font-bold text-white text-base" id="modalPlatformTitle">ربط المنصة</h3>
-                <button onclick="closeModal('apiModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <!-- Login Method Toggle -->
-            <div class="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs font-semibold">
-                <button onclick="setAuthMethod('login')" id="authMethodLogin" class="flex-1 py-1.5 rounded-lg bg-blue-600 text-white">البريد الإلكتروني / الهاتف & كلمة السر</button>
-                <button onclick="setAuthMethod('api')" id="authMethodApi" class="flex-1 py-1.5 rounded-lg text-gray-400">مفتاح API / Webhook</button>
-            </div>
-
-            <div class="space-y-3">
-                <input type="hidden" id="modalPlatformId">
-                
-                <!-- Login Fields -->
-                <div id="loginFormSection" class="space-y-3">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Adresse e-mail / Téléphone</label>
-                        <input type="text" id="modalEmail" placeholder="مثال: name@domain.com أو +2136..." class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Mot de passe</label>
-                        <input type="password" id="modalPassword" placeholder="••••••••••••" class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                    </div>
-                </div>
-
-                <!-- API Form Fields -->
-                <div id="apiFormSection" class="space-y-3 hidden">
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">مفتاح ה-API / Access Token</label>
-                        <input type="password" id="modalApiKey" placeholder="أدخل المفتاح هنا..." class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">رابط Webhook المخصص (إن وجد)</label>
-                        <input type="text" id="modalWebhookUrl" placeholder="https://..." class="w-full bg-gray-900 border border-gray-700 text-xs rounded-xl p-3 text-white">
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-2 pt-2">
-                <button onclick="savePlatformApi()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2.5 rounded-xl">حفظ والربط الحقيقي</button>
-                <button onclick="closeModal('apiModal')" class="bg-gray-800 text-gray-300 text-xs font-bold px-4 py-2.5 rounded-xl">إلغاء</button>
-            </div>
-        </div>
+    <div class="card">
+        <h3>🤖 مولد المحتوى والنشر التلقائي</h3>
+        <textarea id="ai-content" rows="4" placeholder="اكتب أو ولد محتوى المنتج هنا..."></textarea>
+        <button class="btn" onclick="publishContent()">🚀 إرسال ونشر إلى Make.com</button>
     </div>
 
-    <!-- Export Modal -->
-    <div id="exportModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-cardbg border border-gray-800 w-full max-w-md rounded-2xl p-6 space-y-4">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-3">
-                <h3 class="font-bold text-white text-base">تصدير واستيراد الإعدادات</h3>
-                <button onclick="closeModal('exportModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <p class="text-xs text-gray-300">نسخة احتياطية كاملة من إعدادات الربط والـ Webhooks الخاصة بك:</p>
-            <textarea id="exportJsonText" class="w-full h-32 bg-gray-950 border border-gray-800 text-[11px] font-mono text-gray-300 p-2 rounded-xl" readonly></textarea>
-            <button onclick="copyExportJson()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 rounded-xl">نسخ بيانات التهيئة</button>
-        </div>
+    <div class="card">
+        <h3>📊 إحصاءات العمليات اليومية</h3>
+        <p style="color: var(--text-light); margin-top: 6px; font-size: 0.9rem;">إجمالي العمليات الناجحة اليوم: <strong style="color: var(--success);">88</strong></p>
     </div>
 
-    <footer class="border-t border-gray-800 px-4 py-3 bg-cardbg text-center text-xs text-gray-500">
-        تطبيق Maryoul للعمليات الرقمية والأتمتة التلقائية © 2026 | جاهز للعمل مع n8n, Make, و Cloudflare Workers
-    </footer>
+    <div id="toast" class="toast">تم الإرسال بنجاح!</div>
 
-    <!-- Logic Script -->
     <script>
-        const platforms = [
-            { id: 'canva', name: 'Canva Pro & Design Hub', icon: 'fa-solid fa-palette', color: 'text-cyan-400', connected: true },
-            { id: 'youtube', name: 'YouTube Studio & Shorts', icon: 'fa-brands fa-youtube', color: 'text-red-500', connected: true },
-            { id: 'shopify', name: 'Shopify Storefront', icon: 'fa-bag-shopping', color: 'text-emerald-400', connected: true },
-            { id: 'aliexpress', name: 'AliExpress Dropshipping', icon: 'fa-solid fa-cart-shopping', color: 'text-amber-500', connected: true },
-            { id: 'instagram', name: 'Instagram Creator API', icon: 'fa-brands fa-instagram', color: 'text-purple-400', connected: true },
-            { id: 'tiktok', name: 'TikTok Shop & Business', icon: 'fa-brands fa-tiktok', color: 'text-pink-500', connected: true },
-            { id: 'telegram', name: 'Telegram Bot API', icon: 'fa-brands fa-telegram', color: 'text-sky-400', connected: true },
-            { id: 'facebook', name: 'Facebook Ads & Pages', icon: 'fa-brands fa-facebook', color: 'text-blue-500', connected: true },
-            { id: 'snapchat', name: 'Snapchat Business API', icon: 'fa-brands fa-snapchat', color: 'text-yellow-400', connected: false },
-            { id: 'redotpay', name: 'RedotPay Wallet API', icon: 'fa-solid fa-wallet', color: 'text-red-400', connected: true },
-            { id: 'n8n', name: 'n8n Automation Engine', icon: 'fa-solid fa-bolt', color: 'text-rose-500', connected: true },
-            { id: 'make', name: 'Make (Integromat)', icon: 'fa-solid fa-circle-nodes', color: 'text-purple-500', connected: false },
-            { id: 'cloudflare', name: 'Cloudflare Workers', icon: 'fa-solid fa-cloud', color: 'text-orange-400', connected: true },
-            { id: 'metricool', name: 'Metricool Analytics', icon: 'fa-solid fa-chart-pie', color: 'text-teal-400', connected: false },
-            { id: 'github', name: 'GitHub Developer Hub', icon: 'fa-brands fa-github', color: 'text-gray-300', connected: true }
-        ];
+        const WEBHOOK_URL = "https://hook.eu1.make.com/9m46zcwdywh..."; // رابط الـ Webhook الخاص بك
 
-        let autoInterval = null;
-
-        window.onload = function() {
-            renderPlatforms();
-            renderWorkflows();
-            initChart();
-            startAutoSimulation();
-        };
-
-        function renderPlatforms() {
-            const grid = document.getElementById('platformsGrid');
-            grid.innerHTML = '';
-            platforms.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'glass-panel p-4 rounded-2xl border border-gray-800 flex flex-col justify-between space-y-3';
-                card.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <i class="${p.icon} text-xl ${p.color}"></i>
-                            <span class="font-bold text-xs text-white">${p.name}</span>
-                        </div>
-                        <span class="w-2 h-2 rounded-full ${p.connected ? 'bg-emerald-400 pulse-live' : 'bg-gray-600'}"></span>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-gray-800/60">
-                        <span class="text-[11px] ${p.connected ? 'text-emerald-400' : 'text-gray-500'} font-medium">
-                            ${p.connected ? 'متصل ومفعل' : 'غير متصل'}
-                        </span>
-                        <button onclick="${p.connected ? `disconnectPlatform('${p.id}')` : `openApiModal('${p.id}', '${p.name}')`}" 
-                                class="text-xs px-3 py-1 rounded-lg border ${p.connected ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-blue-500/40 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30'}">
-                            ${p.connected ? 'إلغاء الربط' : 'ربط الآن'}
-                        </button>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
         }
 
-        const workflows = [
-            { name: 'جلب المنتجات المائلة للانتشار + تصاميم Canva + نشر بـ IG & TikTok & Shorts', status: 'نشط (كل 2 ساعة)' },
-            { name: 'تحويل روابط AliExpress لروابط أفلييت ونشرها في Telegram', status: 'نشط (فوري)' },
-            { name: 'مزامنة العمولات والأرباح مع Cloudflare Workers & RedotPay', status: 'نشط (يومياً)' }
-        ];
-
-        function renderWorkflows() {
-            const list = document.getElementById('workflowList');
-            list.innerHTML = '';
-            workflows.forEach((w) => {
-                list.innerHTML += `
-                    <div class="bg-gray-950 p-3 rounded-xl border border-gray-800 flex justify-between items-center text-xs">
-                        <div class="flex items-center gap-2">
-                            <i class="fa-solid fa-arrow-right-rotate text-blue-400"></i>
-                            <span class="text-gray-200">${w.name}</span>
-                        </div>
-                        <span class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">${w.status}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function addWorkflow() {
-            const trigger = document.getElementById('wfTrigger').value;
-            const action = document.getElementById('wfAction').value;
-            workflows.unshift({ name: `${trigger} ──► ${action}`, status: 'نشط (جديد)' });
-            renderWorkflows();
-            addLog(`تم إضافة مسار أتمتة جديد بنجاح: ${action}`);
-        }
-
-        function addLog(message) {
-            const logs = document.getElementById('liveLogs');
-            const time = new Date().toLocaleTimeString('ar-EG');
-            const logItem = document.createElement('div');
-            logItem.className = "flex gap-2 text-gray-300";
-            logItem.innerHTML = `<span class="text-gray-500">[${time}]</span> <span>${message}</span>`;
-            logs.appendChild(logItem);
-            logs.scrollTop = logs.scrollHeight;
-        }
-
-        function clearLogs() {
-            document.getElementById('liveLogs').innerHTML = '';
-        }
-
-        function testWebhook() {
-            const url = document.getElementById('testWebhookUrl').value;
-            if(!url) { alert('الرجاء إدخل رابط Webhook للاختبار'); return; }
-            addLog(`جاري إرسال طلب تجريبي إلى: ${url}...`);
-            setTimeout(() => {
-                addLog(`✅ استجابة ناجحة HTTP 200 OK من Webhook n8n!`);
-            }, 1000);
-        }
-
-        function toggleAutoPilot(checkbox) {
-            if(checkbox.checked) {
-                startAutoSimulation();
-                addLog("تم تشغيل محرك الأتمتة التلقائي (Auto-Pilot Active)");
-            } else {
-                clearInterval(autoInterval);
-                addLog("تم إيقاف محرك الأتمتة التلقائي مؤقتاً");
+        async function publishContent() {
+            const content = document.getElementById('ai-content').value;
+            if (!content) {
+                showToast("الرجاء كتابة محتوى أولاً!");
+                return;
             }
-        }
-
-        function startAutoSimulation() {
-            if(autoInterval) clearInterval(autoInterval);
-            autoInterval = setInterval(() => {
-                const actions = [
-                    "تم سحب 4 منتجات جديدة من AliExpress تلقائياً.",
-                    "توليد قالب تصميم جديد على Canva Pro وصياغة نص بـ Gemini API.",
-                    "نشر تلقائي بنجاح على YouTube Shorts و TikTok.",
-                    "تسجيل عمولة جديدة بقيمة $22.40 وتحديث محفظة RedotPay."
-                ];
-                const randomAction = actions[Math.floor(Math.random() * actions.length)];
-                addLog(randomAction);
-                
-                const counter = document.getElementById('execCount');
-                if(counter) {
-                    let val = parseInt(counter.innerText.replace(',', ''));
-                    counter.innerText = (val + 1).toLocaleString();
-                }
-            }, 5000);
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-blue-600', 'text-white');
-                el.classList.add('bg-gray-800', 'text-gray-400');
-            });
-
-            document.getElementById(`content-${tabId}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            activeBtn.classList.remove('bg-gray-800', 'text-gray-400');
-            activeBtn.classList.add('bg-blue-600', 'text-white');
-        }
-
-        function generateAICopy() {
-            const pName = document.getElementById('aiProductName').value || "منتج ذكي";
-            const platform = document.getElementById('aiPlatform').value;
-            document.getElementById('aiResultText').value = "جاري الاتصال بـ Gemini API لتوليد النصوص وصور Canva...";
             
-            setTimeout(() => {
-                document.getElementById('aiResultText').value = 
-`🔥 عرض خاص وحصري على ${pName}! 
-منتج مميز وعالي الجودة متاح الآن في متجر Maryoul مع شحن سريع 🛍️
-
-✨ المميزات الأساسية:
-- تقنية حديثة وسهلة الاستخدام
-- خصم خاص لفترة محدودة جداً
-
-🔗 اطلبه فوراً عبر الرابط في البايو!
-#Maryoul #تسويق #${platform.split(' ')[0]} #عروض #AliExpress`;
-                addLog(`تم توليد محتوى بـ Gemini API للمنتج: ${pName}`);
-            }, 1200);
-        }
-
-        function copyAiOutput() {
-            const txt = document.getElementById('aiResultText');
-            txt.select();
-            document.execCommand('copy');
-            alert('تم نسخ النص التسويقي بنجاح!');
-        }
-
-        function triggerAutoPost() {
-            addLog("جاري إرسال البيانات إلى n8n Webhook للنشر الفوري والتصميم عبر Canva...");
-            setTimeout(() => {
-                addLog("✅ تم النشر التلقائي بنجاح على منصات التواصل الاجتماعي المرتبطة!");
-            }, 1000);
-        }
-
-        function setAuthMethod(method) {
-            const loginBtn = document.getElementById('authMethodLogin');
-            const apiBtn = document.getElementById('authMethodApi');
-            const loginSec = document.getElementById('loginFormSection');
-            const apiSec = document.getElementById('apiFormSection');
-
-            if(method === 'login') {
-                loginBtn.classList.add('bg-blue-600', 'text-white');
-                loginBtn.classList.remove('text-gray-400');
-                apiBtn.classList.remove('bg-blue-600', 'text-white');
-                apiBtn.classList.add('text-gray-400');
-                loginSec.classList.remove('hidden');
-                apiSec.classList.add('hidden');
-            } else {
-                apiBtn.classList.add('bg-blue-600', 'text-white');
-                apiBtn.classList.remove('text-gray-400');
-                loginBtn.classList.remove('bg-blue-600', 'text-white');
-                loginBtn.classList.add('text-gray-400');
-                apiSec.classList.remove('hidden');
-                loginSec.classList.add('hidden');
-            }
-        }
-
-        function openApiModal(id, name) {
-            document.getElementById('modalPlatformId').value = id;
-            document.getElementById('modalPlatformTitle').innerText = `ربط منصة: ${name}`;
-            document.getElementById('apiModal').classList.remove('hidden');
-        }
-
-        function savePlatformApi() {
-            const id = document.getElementById('modalPlatformId').value;
-            const item = platforms.find(p => p.id === id);
-            if(item) {
-                item.connected = true;
-                renderPlatforms();
-                addLog(`تم تسجيل الدخول وربط منصة ${item.name} بنجاح.`);
-            }
-            closeModal('apiModal');
-        }
-
-        function disconnectPlatform(id) {
-            const item = platforms.find(p => p.id === id);
-            if(item) {
-                item.connected = false;
-                renderPlatforms();
-                addLog(`تم إلغاء ربط منصة ${item.name}.`);
-            }
-        }
-
-        function openModal(id) {
-            if(id === 'exportModal') {
-                document.getElementById('exportJsonText').value = JSON.stringify(platforms, null, 2);
-            }
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function copyExportJson() {
-            const txt = document.getElementById('exportJsonText');
-            txt.select();
-            document.execCommand('copy');
-            alert('تم نسخ بيانات الإعدادات!');
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
-                    datasets: [{
-                        label: 'العمولات ($)',
-                        data: [150, 240, 380, 310, 520, 490, 680],
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
-                        y: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } }
-                    }
+            showToast("جاري الإرسال إلى Make.com...");
+            try {
+                const res = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: content, timestamp: new Date().toISOString() })
+                });
+                if (res.ok) {
+                    showToast("تم إرسال البيانات ونشرها بنجاح!");
+                } else {
+                    showToast("فشل في إرسال البيانات للخادم");
                 }
-            });
-        }
-
-        function calculateROI() {
-            const spend = parseFloat(document.getElementById('roiAdSpend').value) || 0;
-            const rev = parseFloat(document.getElementById('roiRevenue').value) || 0;
-            const profit = rev - spend;
-            const roi = spend > 0 ? ((profit / spend) * 100).toFixed(2) : 0;
-            document.getElementById('netProfitVal').innerText = `$${profit.toFixed(2)}`;
-            document.getElementById('roiPercentVal').innerText = `${roi}%`;
-        }
-
-        let isEnglish = false;
-        function toggleLanguage() {
-            isEnglish = !isEnglish;
-            document.dir = isEnglish ? 'ltr' : 'rtl';
-            document.getElementById('langText').innerText = isEnglish ? 'العربية' : 'English';
-        }
-
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
+            } catch (err) {
+                showToast("خطأ في الاتصال بالشبكة");
+            }
         }
     </script>
 </body>
